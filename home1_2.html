@@ -1,0 +1,79 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>nodeserver1 home</title>
+    <script src="https://cdn.bootcss.com/jquery/2.1.1/jquery.min.js"></script>
+</head>
+<body>
+<p>nodeserver practise</p>
+<br>
+<a href="/one">one</a>
+<br>
+<a href="/two">two</a>
+<br>
+<a href="/four">four</a>
+<br>
+<p>to save a message</p>
+<form action="">
+<textarea name="msgarea" id="message" cols="30" rows="10"></textarea>
+    <br>
+    <!--name一定要赋值，否则数据不会自动加到get或post的发送数据中。-->
+    <button id="save_get">save by get</button><button id="save_post">save by post</button>
+</form>
+<br>
+<div>
+    <p>msg.txt display :</p>
+    <textarea name="showmsg" id="showmsg" cols="30" rows="10"></textarea>
+</div>
+
+<div style="border:1px solid red">
+    123
+    <form action="/savepic2" method="post" enctype="multipart/form-data">
+    <input type="text" name="filename" placeholder="输入想存为的文件名">
+        <br>
+    <input type="file" name="file">
+        <br>
+    <input type="submit" name="btn-submit">
+    </form>
+</div>
+
+<script>
+    $(function($)
+    {
+        $('#save_get').click(function () {
+            var msg = $('#message').val();
+            $.ajax({
+                type: 'get',
+                url: '/three',
+                data: {'msg': msg}
+            });
+        });
+
+        $('#save_post').click(function () {
+            var msg = $('#message').val();
+            $.ajax({
+                type: 'post',
+                url: '/three',
+                data: {'msg': msg}
+            });
+        });
+
+        $.ajax({
+                type: 'get',
+                url: '/showdata',
+                data: {
+                    'data': 'msgtxt',
+                    'datatype': 'text'
+                },
+                success : function (data, status) {
+                $('#showmsg').text(data);
+            }
+            })
+    });
+
+
+</script>
+
+</body>
+</html>

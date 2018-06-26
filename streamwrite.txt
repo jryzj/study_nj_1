@@ -1,0 +1,1 @@
+var Sparkle,isNullOrEmpty,concat,join,SparkleFramework;!function(n){if("object"==typeofhahahahah

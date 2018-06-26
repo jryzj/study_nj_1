@@ -1,0 +1,28 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Document</title>
+    <script src="https://cdn.bootcss.com/jquery/2.1.1/jquery.min.js"></script>
+</head>
+<body>
+
+<div class="container">
+    <div class="btn" onclick="getText()">获取数据</div>
+    <div class="text"></div>
+</div>
+<div>
+<h1 style="color:red">this is a simple nodejs server!</h1>
+</div>
+
+</body>
+
+<script type="text/javascript">
+
+    function getText(){
+        $(".text").load("http:127.0.0.1:8080");
+    }
+
+</script>
+
+</html>

@@ -1,0 +1,303 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>nodeserver1-3</title>
+
+    <link href="https://cdn.bootcss.com/bootstrap/4.1.1/css/bootstrap.min.css" rel="stylesheet">
+
+    <script src="https://cdn.bootcss.com/jquery/2.1.1/jquery.min.js"></script>
+
+    <script src="https://cdn.bootcss.com/popper.js/1.14.3/umd/popper.min.js"></script>
+
+    <script src="https://cdn.bootcss.com/bootstrap/4.1.1/js/bootstrap.min.js"></script>
+
+    <script src="https://cdn.jsdelivr.net/npm/vue/dist/vue.js"></script>
+
+    <script src="https://cdn.bootcss.com/holder/2.9.4/holder.min.js"></script>
+
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+
+    <style>
+        .hint{
+            color : red;
+            visibility: hidden;
+        }
+    </style>
+
+</head>
+<body>
+<div class="container">
+    <h2>MY PRACTICE FOR MYSQL OPERATION</h2>
+    <p>Input a Record</p>
+    <div id="input">
+        <form action="" name='op_form' id="op_form" onsubmit="return false;">
+            <div class="form-group">
+                <div class="form-row">
+                    <div class="col-md-3">
+                        <p>Name</p>
+                        <input type="text" name='user_name' id='user_name' placeholder="name">
+                        <p class="hint" id="user_name_hint"></p>
+                    </div>
+                    <div class="col-md-3">
+                        <p>Gender</p>
+                        <input type="text" name='user_gender' id='user_gender' placeholder="male or female">
+                        <p class="hint" id="user_gender_hint"></p>
+                    </div>
+                    <div class="col-md-3">
+                        <p>Age</p>
+                        <input type="text" name='user_age' id='user_age'placeholder="age">
+                        <p class="hint" id="user_age_hint"></p>
+                    </div>
+                    <div class="col-md-3">
+                        <p>Email</p>
+                        <input type="text" name='user_email' id='user_email' placeholder="xxx@yyy.com">
+                        <p class="hint" id="user_email_hint"></p>
+                    </div>
+                </div>
+            </div>
+            <div btn btn-group>
+                <button class="btn" type='button' id="user_submit">Insert</button>
+                <button class="btn" tyep='button'id="user_update">Updata</button>
+                <button class="btn" tyep='button'id="user_delete">Delete</button>
+                <button class="btn" tyep='button'id="user_query">Query</button>
+                <p class = 'hint' id="user_form_hint"></p>
+            </div>
+
+        </form>
+    </div>
+    <br>
+    <hr>
+    <p>List of Record</p>
+    <table class="table" id="user_list">
+        <thead>
+        <th scope="col">Name</th>
+        <th scope="col">Gender</th>
+        <th scope="col">Age</th>
+        <th scope="col">Email</th>
+        </thead>
+        <tbody>
+        <tr>
+<!--            <td>1</td>
+            <td>2</td>
+            <td>3</td>
+            <td>4</td>-->
+        </tr>
+        </tbody>
+    </table>
+
+</div>
+
+<script>
+    'use strict'
+
+    $(function($){
+        let home_form_valid = 0b0000;
+        let user_list_params = {'name':'', 'gender':'', 'age':'', 'email':''};
+        // template user_list_row_template = '<tr><td>${user[name]}</td><td>${user[gender]}</td><td>${user[age]}</td><td>${user[email]}</td></tr>';
+        let user_data_updated = 0;
+
+
+        $('#user_name').blur(function(){
+            $('#user_name_hint').text('name').removeClass('text-danger visible');
+            home_form_valid = home_form_valid & 0b1000 ? (home_form_valid & 0b0111) : home_form_valid;
+            if($('#user_name').val().length != 0) {
+                let reg = new RegExp('^[\u4E00-\u9FA5A-Za-z]+$');
+                if (!reg.test($('#user_name').val())) {
+                    $('#user_name_hint').text('只允许汉字或字母！').addClass('text-danger visible');
+                }
+                else {
+                    home_form_valid |= 0b1000;
+                }
+            }
+        });
+
+        $('#user_gender').blur(function () {
+            $('#user_gender_hint').text('gender').removeClass('text-danger visible');
+            home_form_valid = home_form_valid & 0b0100 ? (home_form_valid & 0b1011) : home_form_valid;
+            if ($('#user_gender').val().length != 0) {
+            // var reg = /^male$|^female$/i;
+            let reg =/^(\u5973|\u7537|male|female)$/i;
+            if (!reg.test($('#user_gender').val())) {
+                $('#user_gender_hint').text('只允许male，female，男，女！').addClass('text-danger visible');
+            }
+            else{
+                home_form_valid |= 0b0100;
+            }
+        }
+        });
+
+        $('#user_age').blur(function () {
+            $('#user_age_hint').text('age').removeClass('text-danger visible');
+            home_form_valid = home_form_valid & 0b0010 ? (home_form_valid & 0b1101) : home_form_valid;
+            let age = $('#user_age').val();
+            if (age.length != 0) {
+                let reg = /^[1-9]\d{0,2}$/;
+                if (!reg.test(age)){
+                    $('#user_age_hint').text('只允许1-3位数字').addClass('text-danger visible');
+                }
+                else {
+                    home_form_valid |= 0b0010;
+                }
+                    }
+        });
+
+        $('#user_email').blur(function () {
+            $('#user_email_hint').text('email').removeClass('text-danger visible');
+            home_form_valid = home_form_valid & 0b0001 ? (home_form_valid & 0b1110) : home_form_valid;
+            let email = $('#user_email').val();
+            if(email.length != 0){
+                let reg =/^\w+((-\w+)|(\.\w+))*\@[A-Za-z0-9]+((\.|-)[A-Za-z0-9]+)*\.[A-Za-z0-9]+$/;
+                if(!reg.test(email)){
+                    $('#user_email_hint').text('邮箱格式错误！').addClass('text-danger visible');
+                }
+                else{
+                    home_form_valid |= 0b0001;
+                }
+            }
+        });
+
+
+
+        $('#user_submit').click(function(){
+            $('#user_form_hint').text('form_hint').removeClass('text-danger visible');
+            if(home_form_valid == 0b1111){
+                let params ={};
+                $('#op_form').find('input').each(function () {
+                    let name = $(this).attr('name').substring(5);
+                    let value = $(this).val();
+                    params[name]=value;
+                });
+                $.get('/home/user_insert',params, function (status) {
+                    console.log(status,'user_insert');
+                    console.log(params);
+                    user_query(user_list_params, function (data) {
+                        showUserList(data);
+                    });
+                });
+                console.log(params);
+            }
+            else {
+                let hint ='';
+                if (!(home_form_valid & 0b1000)) hint = hint + ' name,';
+                if (!(home_form_valid & 0b0100)) hint = hint + ' gender,';
+                if (!(home_form_valid & 0b0010)) hint = hint + ' age,';
+                if (!(home_form_valid & 0b0001))
+                    hint = hint + ' email'
+                    else
+                        hint = hint.substring(0,hint.length-1);
+                    hint = `Don\'t allow${hint} empty!  ${home_form_valid}`;
+                    $('#user_form_hint').text(hint).addClass('text-danger visible');
+                }
+        })
+
+        $('#user_query').click(function() {
+                let params ={};
+                $('#op_form').find('input').each(function () {
+                    let name = $(this).attr('name').substring(5);
+                    let value = $(this).val();
+                    params[name]=value;
+                });
+                $.get('/home/user_query',params, function (status) {
+                    console.log(status);
+                    console.log(params);
+                    user_query(params,function (data) {
+                        showUserList(data)
+                    });
+                });
+                console.log(params);
+        })
+
+        $('#user_update').click(function(){
+            $('#user_form_hint').text('form_hint').removeClass('text-danger visible');
+            if(home_form_valid == 0b1111){
+                let params ={};
+                $('#op_form').find('input').each(function () {
+                    let name = $(this).attr('name').substring(5);
+                    let value = $(this).val();
+                    params[name]=value;
+                });
+                $.get('/home/user_update',params, function (status) {
+                    console.log(status,'user_update');
+                    console.log(params);
+                    user_query(user_list_params, function (data) {
+                        showUserList(data);
+                    });
+                });
+                console.log(params);
+            }
+            else {
+                let hint ='';
+                if (!(home_form_valid & 0b1000)) hint = hint + ' name,';
+                if (!(home_form_valid & 0b0100)) hint = hint + ' gender,';
+                if (!(home_form_valid & 0b0010)) hint = hint + ' age,';
+                if (!(home_form_valid & 0b0001))
+                    hint = hint + ' email'
+                else
+                    hint = hint.substring(0,hint.length-1);
+                hint = `Don\'t allow${hint} empty!  ${home_form_valid}`;
+                $('#user_form_hint').text(hint).addClass('text-danger visible');
+            }
+        })
+
+
+        $('#user_delete').click(function () {
+            let params ={};
+            $('#op_form').find('input').each(function () {
+                let name = $(this).attr('name').substring(5);
+                let value = $(this).val();
+                params[name]=value;
+            });
+            $.get('/home/user_delete',params, function (status) {
+                console.log(status);
+                console.log(params);
+                user_query(user_list_params,function (data) {
+                    showUserList(data)
+                });
+            });
+            console.log(params);
+        })
+
+        function user_query(params, callback) {
+            $.ajax({
+                type : 'GET',
+                url : '/home/user_query',
+                data : params, //json
+                success : function (data) {
+                    console.log(data);         //是字符串
+                    data = JSON.parse(data);
+                    callback(data);
+                }
+            })
+        }
+
+        function showUserList(listdata){
+            $('#user_list').find('tbody').html('');
+            for (let i in listdata){
+                console.log(i);
+                let user = listdata [i];
+                console.log(user);
+                /*                        $('#user_list').find('tbody').append(`<tr>
+                                                                            <td>${user[name]}</td>
+                                                                           <td>${user[gender]}</td>
+                                                                          <td>${user[age]}</td>
+                                                                         <td>${user[email]}</td>
+                                                                         </tr>`);*/
+                $('#user_list').find('tbody').append('<tr><td>'+user['name']+'</td>\
+                                                           <td>'+user['gender']+'</td>\
+                                                          <td>'+user['age']+'</td>\
+                                                         <td>'+user['email']+'</td>\
+                                                         </tr>');
+            }
+        }
+
+
+        $('#user_list').ready(user_query(user_list_params, function(data){
+            showUserList(data);
+        }));
+
+
+    })
+</script>
+</body>
+</html>
